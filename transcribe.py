@@ -18,12 +18,17 @@ import argparse
 import base64
 import configparser
 import json
+import os
 import threading
 import time
 
 import pyaudio
 import websocket
+from dotenv import load_dotenv
 from websocket._abnf import ABNF
+
+load_dotenv()
+
 
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
@@ -169,15 +174,17 @@ def get_url():
     # See
     # https://console.bluemix.net/docs/services/speech-to-text/websockets.html#websockets
     # for details on which endpoints are for each region.
-    region = config.get('auth', 'region')
-    host = REGION_MAP[region]
+    # region = config.get('auth', 'region')
+    host = os.environ.get("REGION")
     return ("wss://{}/speech-to-text/api/v1/recognize"
            "?model=en-AU_BroadbandModel").format(host)
 
 def get_auth():
-    config = configparser.RawConfigParser()
-    config.read('speech.cfg')
-    apikey = config.get('auth', 'apikey')
+    # config = configparser.RawConfigParser()
+    # config.read('speech.cfg')
+    apikey = os.environ.get("APIKEY_WATSON")
+    # region = os.environ.get("REGION")
+    # apikey = config.get('auth', 'apikey')
     return ("apikey", apikey)
 
 
