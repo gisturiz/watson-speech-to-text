@@ -18,17 +18,12 @@ import argparse
 import base64
 import configparser
 import json
-import os
 import threading
 import time
 
 import pyaudio
 import websocket
-from dotenv import load_dotenv
 from websocket._abnf import ABNF
-
-load_dotenv()
-
 
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
@@ -57,10 +52,8 @@ REGION_MAP = {
 
 def read_audio(ws, timeout):
     """Read audio and sent it to the websocket port.
-
     This uses pyaudio to read from a device in chunks and send these
     over the websocket wire.
-
     """
     global RATE
     p = pyaudio.PyAudio()
@@ -108,7 +101,6 @@ def read_audio(ws, timeout):
 
 def on_message(self, msg):
     """Print whatever messages come in.
-
     While we are processing any non trivial stream of speech Watson
     will start chunking results into bits of transcripts that it
     considers "final", and start on a new stretch. It's not always
@@ -174,17 +166,15 @@ def get_url():
     # See
     # https://console.bluemix.net/docs/services/speech-to-text/websockets.html#websockets
     # for details on which endpoints are for each region.
-    # region = config.get('auth', 'region')
-    host = os.environ.get("REGION")
+    region = config.get('auth', 'region')
+    host = REGION_MAP[region]
     return ("wss://{}/speech-to-text/api/v1/recognize"
-           "?model=en-AU_BroadbandModel").format(host)
+           "?model=en-US_BroadbandModel").format(host)
 
 def get_auth():
-    # config = configparser.RawConfigParser()
-    # config.read('speech.cfg')
-    apikey = os.environ.get("APIKEY_WATSON")
-    # region = os.environ.get("REGION")
-    # apikey = config.get('auth', 'apikey')
+    config = configparser.RawConfigParser()
+    config.read('speech.cfg')
+    apikey = config.get('auth', 'apikey')
     return ("apikey", apikey)
 
 
